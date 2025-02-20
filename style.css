@@ -7,6 +7,7 @@
   user-select: none;   /* 텍스트복사방지 */
 }
 
+html { font-size: 1vw; }
 
 body {
   width: 100vw;
