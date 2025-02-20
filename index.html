@@ -1,232 +1,251 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-bs-theme="dark">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>회원가입 계약서</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background-color: #f9f9f9;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="language" content="ko">
+    <title>계약서 선택</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <style>
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin-top: -150px;
+        }
 
-    #container {
-      display: flex;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-    }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
 
-    #inputArea,
-    #terms {
-      padding: 20px;
-      overflow: auto;
-      max-height: 90vh;
-    }
+        .card-body {
+            padding: 2rem;
+        }
 
-    #inputArea {
-      width: 50%;
-      border-right: 1px solid #ccc;
-    }
+        .btn-contract {
+            width: 100%;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
 
-    #terms {
-      width: 50%;
-    }
-
-    h1,
-    h2 {
-      text-align: center;
-      margin-top: 0;
-    }
-
-    label {
-      display: block;
-      margin: 10px 0 5px;
-    }
-
-    input,
-    select,
-    textarea {
-      width: calc(100% - 20px);
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .checkbox-group label {
-      margin-right: 10px;
-    }
-
-    .english-text {
-      font-size: 0.8em;
-    }
-
-    #signature {
-      border: 1px solid #ccc;
-      width: 100%;
-      height: 100px;
-      margin-bottom: 10px;
-    }
-
-    button {
-      display: block;
-      width: calc(100% - 20px);
-      margin: 10px auto;
-      padding: 10px;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 1em;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+        #verification-section,
+        #admin-section {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
-  <div id="container">
-    <div id="inputArea">
-      <h1>회원가입 계약서</h1>
+    <script>
+        localStorage.clear(); // 모든 localStorage 데이터 삭제
+    </script>
 
-      <label for="branch">지점 <span class="english-text">Branch</span></label>
-      <input type="text" id="branch" placeholder="지점 입력">
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
+                <div id="contract-selection">
+                    <h2 class="text-center mb-4">계약서 선택</h2>
+                    <button class="btn btn-primary btn-contract" onclick="showVerification()">회원가입계약서</button>
+                    <button class="btn btn-secondary btn-contract" disabled>PT계약서 (준비중)</button>
+                    <button class="btn btn-secondary btn-contract" disabled>일일권계약서 (준비중)</button>
+                </div>
 
-      <label for="counselor">계약담당 <span class="english-text">Counselor</span></label>
-      <input type="text" id="counselor" placeholder="계약담당 입력">
+                <div id="verification-section">
+                    <h2 class="text-center mb-4">전화번호 인증</h2>
+                    <div id="phone-section" class="mb-3">
+                        <label class="form-label">전화번호</label>
+                        <div class="input-group">
+                            <span class="input-group-text">+82</span>
+                            <input type="tel" inputmode="tel" pattern="[0-9]*" class="form-control" id="phone"
+                                placeholder="01012341234">
+                        </div>
+                        <button id="send-code" class="btn btn-primary mt-3 w-100">인증번호 전송</button>
+                    </div>
+                    <div id="verification-code-section" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">인증번호</label>
+                            <input type="text" class="form-control" id="verification-code" placeholder="6자리 코드 입력"
+                                inputmode="tel" lang="ko">
+                            <button id="verify-code" class="btn btn-success mt-3 w-100">인증하기</button>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p></p>
+                        <button id="admin-button" onclick="showAdminSection()" class="btn btn-secondary">관리자코드
+                            입력</button>
+                    </div>
+                    <div id="verification-success" style="display: none;" class="alert alert-success mt-3">
+                        인증이 완료되었습니다!
+                    </div>
+                </div>
 
-      <label for="name">성명 <span class="english-text">Name</span></label>
-      <input type="text" id="name" placeholder="성명 입력">
-
-      <label for="contact">연락처 <span class="english-text">Contact</span></label>
-      <input type="text" id="contact" placeholder="전화번호 입력">
-
-      <label for="gender">성별 <span class="english-text">Gender</span></label>
-      <div class="checkbox-group">
-        <label><input type="radio" name="gender" id="male" value="male"> 남</label>
-        <label><input type="radio" name="gender" id="female" value="female"> 여</label>
-      </div>
-
-      <label for="birthdate">생년월일 <span class="english-text">Birthdate</span></label>
-      <input type="date" id="birthdate">
-
-      <label for="address">주소 <span class="english-text">Address</span></label>
-      <input type="text" id="address" placeholder="지번, 번지수 입력">
-
-      <label for="membership">회원권 <span class="english-text">Membership</span></label>
-      <select id="membership">
-        <option value="new">New</option>
-        <option value="renew">Renew</option>
-        <option value="upgrade">Upgrade</option>
-      </select>
-
-      <label for="fee">기간비용 <span class="english-text">Fee</span></label>
-      <input type="text" id="fee" placeholder="기간비용 입력" oninput="formatNumber(this)">
-
-      <label for="total">합계 <span class="english-text">Total</span></label>
-      <input type="text" id="total" placeholder="총 비용 입력" oninput="formatNumber(this)">
-
-      <label for="exercise-type">운동종류 <span class="english-text">Exercise Type</span></label>
-      <input type="text" id="exercise-type" placeholder="운동종류 입력">
-
-      <div class="checkbox-group">
-        <label><input type="checkbox" id="morning"> 오전 <span class="english-text">Morning</span></label>
-        <label><input type="checkbox" id="afternoon"> 오후 <span class="english-text">Afternoon</span></label>
-      </div>
-
-      <label for="personal-info">개인정보 <span class="english-text">Personal Info</span></label>
-      <textarea id="personal-info" rows="4" placeholder="개인정보 입력"></textarea>
-
-      <label for="signature">신청인 서명</label>
-      <canvas id="signature"></canvas>
-      <button id="clearSignature">서명 지우기</button>
-
-      <button id="submitBtn">제출</button>
+                <div id="admin-section">
+                    <h2 class="text-center mb-4">관리자 인증</h2>
+                    <div class="mb-3">
+                        <label class="form-label">관리자 코드</label>
+                        <input type="password" class="form-control" id="admin-code">
+                        <button onclick="verifyAdmin()" class="btn btn-primary mt-3 w-100">확인</button>
+                        <div id="user-info" class="alert mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="terms">
-      <h2>이용 약관</h2>
-      <p>1. 회원은 등록한 기간 동안 본 시설을 이용할 수 있습니다.</p>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyP5QTMzBtz8lMEzkE4C66CjFbZ3a17QM",
+            authDomain: "bodystar-1b77d.firebaseapp.com",
+            projectId: "bodystar-1b77d",
+            storageBucket: "bodystar-1b77d.firebasestorage.app",
+            messagingSenderId: "1011822927832",
+            appId: "1:1011822927832:web:87f0d859b3baf1d8e21cad"
+        };
 
-      <h2>24시 이용안내</h2>
-      <p>1. 야간 서비스는 만 19세 이상부터 이용 가능합니다.</p>
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        auth.languageCode = "ko";
 
-      <h2>환불안내</h2>
-      <p>1. 이용 개시일 전에는 위약금 10%가 공제됩니다.</p>
-    </div>
-  </div>
+        function showVerification() {
+            document.getElementById('contract-selection').style.display = 'none';
+            document.getElementById('verification-section').style.display = 'block';
+        }
 
-  <script>
-    const canvas = document.getElementById('signature');
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
+        let verificationId = '';
 
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+        document.getElementById('send-code').addEventListener('click', async () => {
+            const phone = document.getElementById('phone').value;
+            if (!phone) return;
 
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseout', stopDrawing);
+            try {
+                const appVerifier = new firebase.auth.RecaptchaVerifier('send-code', {
+                    size: 'invisible'
+                });
 
-    function startDrawing(e) {
-      isDrawing = true;
-      ctx.beginPath();
-      ctx.moveTo(e.offsetX, e.offsetY);
-    }
+                const formattedPhone = `+82${phone}`;
+                const confirmationResult = await auth.signInWithPhoneNumber(formattedPhone, appVerifier);
+                verificationId = confirmationResult.verificationId;
 
-    function draw(e) {
-      if (!isDrawing) return;
-      ctx.lineTo(e.offsetX, e.offsetY);
-      ctx.stroke();
-    }
+                document.getElementById('verification-code-section').style.display = 'block';
+                document.getElementById('phone-section').style.display = 'none';
+                document.getElementById('admin-button').style.display = 'none';
+            } catch (error) {
+                console.error(error);
+                alert('인증번호 전송 실패');
+            }
+        });
 
-    function stopDrawing() {
-      isDrawing = false;
-      ctx.closePath();
-    }
+        document.getElementById('verify-code').addEventListener('click', async () => {
+            const code = document.getElementById('verification-code').value;
+            if (!code) return;
 
-    document.getElementById('clearSignature').addEventListener('click', function () {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
+            try {
+                const credential = firebase.auth.PhoneAuthProvider.credential(verificationId, code);
+                await auth.signInWithCredential(credential);
 
-    document.getElementById('submitBtn').addEventListener('click', function () {
-      html2canvas(document.body).then(canvas => {
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/jpeg');
-        link.download = '회원가입_계약서.jpg';
-        link.click();
-      });
-    });
+                // Format and store verified phone number in localStorage
+                const phoneNumber = document.getElementById('phone').value;
+                const formattedPhone = phoneNumber.replace(/(\d{3})(\d{3,4})(\d{4})/, '$1-$2-$3');
+                localStorage.setItem('verifiedPhone', formattedPhone);
 
-    function formatNumber(input) {
-      let value = input.value.replace(/[^0-9]/g, '');
-      if (value.length > 3) {
-        value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      }
-      input.value = value;
-    }
-  </script>
+                document.getElementById('phone-section').style.display = 'none';
+                document.getElementById('verification-code-section').style.display = 'none';
+                document.getElementById('verification-success').style.display = 'block';
+
+                setTimeout(() => {
+                    document.getElementById('verification-section').style.display = 'none';
+                    document.getElementById('admin-section').style.display = 'block';
+                }, 1500);
+            } catch (error) {
+                console.error(error);
+                alert('인증 실패');
+            }
+        });
+
+        function showAdminSection() {
+            document.getElementById('verification-section').style.display = 'none';
+            document.getElementById('admin-section').style.display = 'block';
+        }
+
+        async function verifyAdmin() {
+            const adminCode = document.getElementById('admin-code').value;
+            const verifiedPhone = localStorage.getItem('verifiedPhone');
+
+            if (adminCode === '0000') {
+                try {
+                    const querySnapshot = await db.collection("회원가입계약서").get();
+                    let memberFound = false;
+                    let memberData = null;
+
+                    querySnapshot.forEach((doc) => {
+                        if (doc.data().contact === verifiedPhone) {
+                            memberFound = true;
+                            memberData = doc.data();
+                        }
+                    });
+
+                    const userInfo = document.getElementById('user-info');
+                    if (memberFound) {
+                        userInfo.className = 'alert alert-info mt-3';
+                        userInfo.innerHTML = `
+                            <p>기존 회원입니다!</p>
+                            <p>이름: ${memberData.name}</p>
+                            <p>생년월일: ${memberData.birthdate}</p>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <button onclick="loadMemberData('${verifiedPhone}')" class="btn btn-success">불러오기</button>
+                                <button onclick="window.location.href = 'membership.html'" class="btn btn-primary">신규입력</button>
+                            </div>
+                        `;
+                    } else {
+                        userInfo.className = 'alert alert-warning mt-3';
+                        userInfo.innerHTML = '신규고객입니다!';
+                        setTimeout(() => {
+                            window.location.href = 'membership.html';
+                        }, 500);
+                    }
+                    userInfo.style.display = 'block';
+                } catch (error) {
+                    console.error("Error checking member:", error);
+                    alert('오류가 발생했습니다.');
+                }
+            } else {
+                alert('잘못된 관리자 코드입니다.');
+            }
+        }
+
+        function loadMemberData(phone) {
+            window.location.href = `membership.html?phone=${phone}&load=true`;
+        }
+
+        // Add Enter key functionality
+        document.getElementById('phone').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('send-code').click();
+            }
+        });
+
+        document.getElementById('verification-code').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                document.getElementById('verify-code').click();
+            }
+        });
+
+        document.getElementById('admin-code').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                verifyAdmin();
+            }
+        });
+    </script>
 </body>
 
 </html>
